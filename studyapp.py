@@ -49,3 +49,33 @@ def generate_notes_for_topics(content, selected_topics):
     )
     return chat_completion.choices[0].message.content
 
+
+@app.route("/extract_topics", methods=["POST"])
+def extract_topics_endpoint():
+
+    file = request.files["file"]
+    topic = request.form.get("topic")
+
+    if not "file" and not topic:
+        return jsonify({"error": "No file or topic provided"}), 400
+
+    content = ""
+    if file:
+        content += extract_text_from_pdf(file)
+
+    if not content and topic:
+        content += topic
+
+    try:
+        notes = generate_notes(content, topic)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    file_stream = BytesIO()
+    file_stream.write(notes.encode('utf-8'))
+    file_stream.seek(0)
+    return send_file(file_stream, as_attachment=True, download_name="notes.txt", mimetype="text/plain")
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
