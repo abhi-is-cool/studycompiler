@@ -7,7 +7,7 @@ from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 
-openai_client  = OpenAI.Client(api_key = "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")
+openai_client  = OpenAI.Client(api_key = "openai_api_key")
 
 def extract_text_from_pdf(file_stream):
     doc = fitz.open(stream=file_stream.read(), filetype='pdf')
