@@ -10,7 +10,7 @@ CORS(app)
 openai_client  = OpenAI.Client(api_key = "openai_api_key")
 
 def extract_text_from_pdf(file_stream):
-    doc = fitz.open(stream=file_stream.read(), filetype='pdf')
+    doc = fitz.open(stream=file_stream.read(), filetype='pdfb')
     return '\n'.join([page.get_text() for page in doc])
 
 
@@ -37,7 +37,7 @@ def extract_topics(content):
 
 def generate_notes_for_topics(content, selected_topics):
     topic_list_str = ", ".join(t["name"] for t in selected_topics)
-    prompt = f"Based on the following content, generate detailed notes for these topics and subtopics:\n{selected_topics}\n\nContent:{content[:6000]}" if topic else f"Generate detailed notes based on the following content: \n\n{content}"
+    prompt = f"Based on the following content, generate detailed notes for these topics and subtopics:\n{selected_topics}\n\nContent:{content[:6000]}" if selected_topics else f"Generate detailed notes based on the following content: \n\n{content}"
 
     chat_completion = openai_client.chat.completions.create(
         model = "gpt-4",
@@ -67,7 +67,7 @@ def extract_topics_endpoint():
         content += topic
 
     try:
-        notes = generate_notes(content, topic)
+        notes = generate_notes_for_topics(content, topic)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
